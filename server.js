@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js';
+import penRoutes from './routes/penRoutes.js';
 
 // env
 dotenv.config();
@@ -15,7 +16,8 @@ const app = express();
 app.use(cors()); // Allows your React frontend to talk to this backend
 app.use(express.json()); // Allows the server to understand JSON data sent in requests
 
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes); //users
+app.use('/api/pens', penRoutes);  //Pens
 
 app.get('/', (req, res) => {
   res.send('SwineIntel API is running... 🚀');
