@@ -4,6 +4,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js';
 import penRoutes from './routes/penRoutes.js';
+import pigRoutes from './routes/pigRoutes.js';
 
 // env
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json()); // Allows the server to understand JSON data sent in re
 
 app.use('/api/users', userRoutes); //users
 app.use('/api/pens', penRoutes);  //Pens
+app.use('/api/pigs', pigRoutes); //Pigs
 
 app.get('/', (req, res) => {
   res.send('SwineIntel API is running... 🚀');

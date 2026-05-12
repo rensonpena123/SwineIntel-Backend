@@ -18,6 +18,10 @@ const penSchema = new mongoose.Schema(
     currentHeadcount: {
       type: Number,
       default: 0,
+    },
+    assignedCaretaker: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // Reference to your Caretaker (e.g., Ray Bakal)
     }
   },
   { timestamps: true }
@@ -28,9 +32,10 @@ penSchema.pre('save', async function () {
   if (!this.capacity) {
     if (this.type === 'Kural') {
       this.capacity = 15;
+    } else if (this.type === 'Paanakan') {
+      this.capacity = 25; // Adjusted to hold 1 Sow + her piglets
     } else {
-      // Paanakan and Bartolina both handle 1 inahin
-      this.capacity = 1;
+      this.capacity = 1; // Bartolina for 1 Sow
     }
   }
 });
