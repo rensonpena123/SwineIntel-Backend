@@ -1,5 +1,12 @@
 import express from 'express';
-import { addPig, farrowEvent, getPigs, promotePiglets } from '../controllers/pigController.js';
+import { 
+  addPig, 
+  farrowEvent, 
+  getPigs, 
+  promotePiglets, 
+  sellPigs, 
+  recordMortality,
+  updatePigStatus } from '../controllers/pigController.js';
 import { protect, ownerOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -11,5 +18,9 @@ router.route('/')
 
 router.post('/farrow', protect, farrowEvent);    // Record a birth
 router.put('/promote', protect, promotePiglets); // Promote biiks & move Sow
+router.put('/:id/status', protect, updatePigStatus); 
+
+router.put('/sell', protect, sellPigs); // Sales
+router.put('/mortality', protect, recordMortality); // Deaths
 
 export default router;

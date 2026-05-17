@@ -1,5 +1,6 @@
 import Pig from '../models/Pig.js';
 import Pen from '../models/Pen.js';
+import HealthLog from '../models/HealthLog.js'; 
 
 // @desc    Add a new pig (Sow, Piglet, or Fattener)
 // @route   POST /api/pigs
@@ -179,6 +180,139 @@ export const promotePiglets = async (req, res) => {
       message: `Successfully promoted ${piglets.length} piglets to ${kural.name} and moved Sow back to ${bartolina.name}` 
     });
 
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Sell a batch of fatteners (Bulk Sale)
+// @route   PUT /api/pigs/sell
+export const sellPigs = async (req, res) => {
+  try {
+    const { pigIds } = req.body; // Expects an array of Pig IDs: ["id1", "id2"]
+
+    if (!pigIds || !Array.isArray(pigIds) || pigIds.length === 0) {
+      return res.status(400).json({ message: 'No pig IDs provided for sale' });
+    }
+
+    // 1. Find all valid pigs from the list that aren't already sold
+    const pigs = await Pig.find({ _id: { $in: pigIds }, status: { $ne: 'Sold' } });
+
+    if (pigs.length === 0) {
+      return res.status(404).json({ message: 'No valid active pigs found to sell' });
+    }
+
+    // 2. Map out how many pigs are leaving each specific pen
+    const penDeductions = {};
+    pigs.forEach(pig => {
+      if (pig.penId) {
+        penDeductions[pig.penId] = (penDeductions[pig.penId] || 0) + 1;
+      }
+    });
+
+    // 3. Update all selected pigs to Sold status and remove them from active pens
+    await Pig.updateMany(
+      { _id: { $in: pigs.map(p => p._id) } },
+      { 
+        $set: { 
+          status: 'Sold', 
+          isMarketed: true, 
+          penId: null // No longer occupying physical space on the farm
+        } 
+      }
+    );
+
+    // 4. Dynamically subtract the correct headcount from each affected pen
+    for (const penId of Object.keys(penDeductions)) {
+      await Pen.findByIdAndUpdate(penId, { 
+        $inc: { currentHeadcount: -penDeductions[penId] } 
+      });
+    }
+
+    res.json({
+      message: `Successfully processed sale for ${pigs.length} pigs. Pen headcounts updated.`,
+      soldPigIds: pigs.map(p => p._id)
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Record a pig mortality event
+// @route   PUT /api/pigs/mortality
+export const recordMortality = async (req, res) => {
+  try {
+    const { pigId } = req.body;
+
+    const pig = await Pig.findById(pigId);
+    if (!pig) {
+      return res.status(404).json({ message: 'Pig not found' });
+    }
+
+    if (pig.status === 'Deceased') {
+      return res.status(400).json({ message: 'This pig is already recorded as deceased' });
+    }
+    if (pig.status === 'Sold') {
+      return res.status(400).json({ message: 'Cannot record mortality for a sold pig' });
+    }
+
+    const oldPenId = pig.penId;
+
+    // 1. Mark pig as Deceased and remove from its pen layout
+    pig.status = 'Deceased';
+    pig.penId = null; 
+    await pig.save();
+
+    // 2. Drop the headcount of the pen it was in by 1
+    if (oldPenId) {
+      await Pen.findByIdAndUpdate(oldPenId, { $inc: { currentHeadcount: -1 } });
+    }
+
+    res.json({ 
+      message: `Mortality event logged. Pig status updated to Deceased and removed from pen.` 
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Update a single pig's health status (Healthy/Sick) and auto-log incidents
+// @route   PUT /api/pigs/:id/status
+export const updatePigStatus = async (req, res) => {
+  try {
+    const { status, description } = req.body; // description contains symptoms or status details
+    const pigId = req.params.id;
+
+    if (!['Healthy', 'Sick'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid health status value' });
+    }
+
+    const pig = await Pig.findById(pigId);
+    if (!pig) {
+      return res.status(404).json({ message: 'Pig record not found' });
+    }
+
+    // If marked sick, require a description of what is wrong
+    if (status === 'Sick' && !description) {
+      return res.status(400).json({ message: 'Please provide a description of the symptoms for the farm owner' });
+    }
+
+    pig.status = status;
+    await pig.save();
+
+    // Automatically generate an explicit incident entry if the animal is sick
+    if (status === 'Sick') {
+      await HealthLog.create({
+        targetType: 'Pig',
+        pigId: pig._id,
+        logType: 'Sickness Incident',
+        treatmentName: 'Sickness Reported',
+        remarks: description,
+        administeredBy: req.user._id
+      });
+    }
+
+    res.json({ message: `Pig ${pig.tagId} is now marked as ${status}`, pig });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

@@ -5,6 +5,8 @@ import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js';
 import penRoutes from './routes/penRoutes.js';
 import pigRoutes from './routes/pigRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+import healthRoutes from './routes/healthRoutes.js';
 
 // env
 dotenv.config();
@@ -20,6 +22,10 @@ app.use(express.json()); // Allows the server to understand JSON data sent in re
 app.use('/api/users', userRoutes); //users
 app.use('/api/pens', penRoutes);  //Pens
 app.use('/api/pigs', pigRoutes); //Pigs
+
+app.use('/api/dashboard', dashboardRoutes); // For the dashboard
+
+app.use('/api/health', healthRoutes); // Health check
 
 app.get('/', (req, res) => {
   res.send('SwineIntel API is running... 🚀');
