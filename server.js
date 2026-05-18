@@ -7,6 +7,7 @@ import penRoutes from './routes/penRoutes.js';
 import pigRoutes from './routes/pigRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
+import feedRoutes from './routes/feedRoutes.js';
 
 // env
 dotenv.config();
@@ -26,6 +27,8 @@ app.use('/api/pigs', pigRoutes); //Pigs
 app.use('/api/dashboard', dashboardRoutes); // For the dashboard
 
 app.use('/api/health', healthRoutes); // Health check
+
+app.use('/api/feed', feedRoutes); // Feeds
 
 app.get('/', (req, res) => {
   res.send('SwineIntel API is running... 🚀');

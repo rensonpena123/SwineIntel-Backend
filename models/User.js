@@ -27,8 +27,8 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            role: ['owner', 'caretaker'],
-            default: 'caretaker',
+            enum: ['Owner', 'Caretaker'], 
+            default: 'Caretaker',         
         },
         isActive: {
             type: Boolean,
@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
         }
     },
     {
-            timestamps: true //auto tracks 'createdAt' and 'updatedaAt'
+        timestamps: true // auto tracks 'createdAt' and 'updatedAt'
     }
 );
 

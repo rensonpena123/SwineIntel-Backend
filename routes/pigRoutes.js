@@ -20,7 +20,7 @@ router.post('/farrow', protect, farrowEvent);    // Record a birth
 router.put('/promote', protect, promotePiglets); // Promote biiks & move Sow
 router.put('/:id/status', protect, updatePigStatus); 
 
-router.put('/sell', protect, sellPigs); // Sales
+router.put('/sell', protect, ownerOnly, sellPigs); // Sell
 router.put('/mortality', protect, recordMortality); // Deaths
 
 export default router;

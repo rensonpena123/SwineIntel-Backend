@@ -17,20 +17,21 @@ export const protect = async (req, res, next) => {
       // We exclude the password for safety
       req.user = await User.findById(decoded.id).select('-password');
 
-      next(); // Move on to the next function (the controller)
+      return next(); // Explicit return ensures clean execution flow transition
     } catch (error) {
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      return res.status(401).json({ message: 'Not authorized, token failed' });
     }
   }
 
   if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+    return res.status(401).json({ message: 'Not authorized, no token' });
   }
 };
 
 // Guard specifically for Owners
 export const ownerOnly = (req, res, next) => {
-  if (req.user && req.user.role === 'owner') {
+  // FIX: Changed 'owner' to 'Owner' to perfectly match your database Schema Enum values
+  if (req.user && req.user.role === 'Owner') {
     next();
   } else {
     res.status(403).json({ message: 'Access denied. Owners only.' });
