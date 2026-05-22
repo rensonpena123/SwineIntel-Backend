@@ -4,7 +4,7 @@ import HealthLog from '../models/HealthLog.js';
 
 // @desc    Add a new pig (Sow, Piglet, or Fattener)
 // @route   POST /api/pigs
-export const addPig = async (req, res) => {
+export const addPig = async (req, res, next) => {
   try {
     const { pigType, tagId, motherId, penId, breed, gender, weight, assignedCaretaker } = req.body;
 
@@ -41,13 +41,13 @@ export const addPig = async (req, res) => {
 
     res.status(201).json(pig);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc    Get all pigs (with optional filters for type or pen)
 // @route   GET /api/pigs
-export const getPigs = async (req, res) => {
+export const getPigs = async (req, res, next) => {
   try {
     const { type, penId } = req.query;
     let query = {};
@@ -65,13 +65,13 @@ export const getPigs = async (req, res) => {
     const pigs = await Pig.find(query).populate('penId', 'name type');
     res.json(pigs);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc    Record a birth (Farrowing event) and move Mother to Paanakan
 // @route   POST /api/pigs/farrow
-export const farrowEvent = async (req, res) => {
+export const farrowEvent = async (req, res, next) => {
   try {
     const { motherId, penId, pigletCount, breed, assignedCaretaker } = req.body;
 
@@ -123,13 +123,13 @@ export const farrowEvent = async (req, res) => {
       piglets: createdPiglets
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error)
   }
 };
 
 // @desc    Promote a specific litter to Fatteners and move the Mother back to Bartolina
 // @route   PUT /api/pigs/promote
-export const promotePiglets = async (req, res) => {
+export const promotePiglets = async (req, res, next) => {
   try {
     const { motherId, toKuralId, targetBartolinaId } = req.body;
 
@@ -181,13 +181,13 @@ export const promotePiglets = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc    Sell a batch of fatteners (Bulk Sale)
 // @route   PUT /api/pigs/sell
-export const sellPigs = async (req, res) => {
+export const sellPigs = async (req, res, next) => {
   try {
     const { pigIds } = req.body; // Expects an array of Pig IDs: ["id1", "id2"]
 
@@ -234,13 +234,13 @@ export const sellPigs = async (req, res) => {
       soldPigIds: pigs.map(p => p._id)
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc    Record a pig mortality event
 // @route   PUT /api/pigs/mortality
-export const recordMortality = async (req, res) => {
+export const recordMortality = async (req, res, next) => {
   try {
     const { pigId } = req.body;
 
@@ -272,13 +272,13 @@ export const recordMortality = async (req, res) => {
       message: `Mortality event logged. Pig status updated to Deceased and removed from pen.` 
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc    Update a single pig's health status (Healthy/Sick) and auto-log incidents
 // @route   PUT /api/pigs/:id/status
-export const updatePigStatus = async (req, res) => {
+export const updatePigStatus = async (req, res, next) => {
   try {
     const { status, description } = req.body; // description contains symptoms or status details
     const pigId = req.params.id;
@@ -314,6 +314,6 @@ export const updatePigStatus = async (req, res) => {
 
     res.json({ message: `Pig ${pig.tagId} is now marked as ${status}`, pig });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };

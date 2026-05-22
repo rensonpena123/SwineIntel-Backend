@@ -2,7 +2,7 @@ import Pen from '../models/Pen.js';
 
 // @desc    Create a new pen (Kural, Paanakan, or Bartolina)
 // @route   POST /api/pens
-export const createPen = async (req, res) => {
+export const createPen = async (req, res, next) => {
   try {
     const { name, type, capacity } = req.body;
 
@@ -19,17 +19,17 @@ export const createPen = async (req, res) => {
 
     res.status(201).json(pen);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc    Get all pens
 // @route   GET /api/pens
-export const getPens = async (req, res) => {
+export const getPens = async (req, res, next) => {
   try {
     const pens = await Pen.find({});
     res.json(pens);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };

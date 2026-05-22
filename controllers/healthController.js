@@ -4,7 +4,7 @@ import Pen from '../models/Pen.js';
 
 // @desc    Log a medical treatment (Individual Pig or Batch/Pen)
 // @route   POST /api/health
-export const logTreatment = async (req, res) => {
+export const logTreatment = async (req, res, next) => {
   try {
     const { targetType, pigId, penId, logType, treatmentName, dosage, remarks } = req.body;
 
@@ -33,13 +33,13 @@ export const logTreatment = async (req, res) => {
 
     res.status(201).json({ message: 'Medical entry successfully recorded', log: newLog });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc    Get medical history filtered by a specific Pig or a specific Pen
 // @route   GET /api/health
-export const getHealthHistory = async (req, res) => {
+export const getHealthHistory = async (req, res, next) => {
   try {
     const { pigId, penId } = req.query;
     let filter = {};
@@ -53,7 +53,7 @@ export const getHealthHistory = async (req, res) => {
 
     res.json(history);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 

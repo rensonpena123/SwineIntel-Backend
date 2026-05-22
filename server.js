@@ -8,6 +8,7 @@ import pigRoutes from './routes/pigRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
 import feedRoutes from './routes/feedRoutes.js';
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 // env
 dotenv.config();
@@ -29,6 +30,9 @@ app.use('/api/dashboard', dashboardRoutes); // For the dashboard
 app.use('/api/health', healthRoutes); // Health check
 
 app.use('/api/feed', feedRoutes); // Feeds
+
+app.use(notFound);  // Catches any URLs that don't match your routes
+app.use(errorHandler);  // Catches any runtime errors thrown inside your controllers
 
 app.get('/', (req, res) => {
   res.send('SwineIntel API is running... 🚀');

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 // @desc    Register a new user
 // @route   POST /api/users/register
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
 
@@ -40,13 +40,13 @@ export const registerUser = async (req, res) => {
       res.status(400).json({ message: 'Invalid user data' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc    Auth user & get token (Login)
 // @route   POST /api/users/login
-export const authUser = async (req, res) => {
+export const authUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -71,6 +71,6 @@ export const authUser = async (req, res) => {
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
