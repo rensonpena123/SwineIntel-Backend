@@ -64,6 +64,7 @@ export const authUser = async (req, res, next) => {
       res.json({
         _id: user._id,
         firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role,
         token: token, // We send this token back to the frontend
       });
