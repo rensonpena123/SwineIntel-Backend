@@ -75,3 +75,15 @@ export const authUser = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc     Get all registered users
+// @route    GET /api/users
+export const getUsers = async (req, res, next) => {
+  try {
+    // Fetch all users but exclude the hashed password strings for data integrity
+    const users = await User.find({}).select('-password');
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
+};
